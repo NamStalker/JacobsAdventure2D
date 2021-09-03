@@ -6,6 +6,7 @@ var _max_speed = 150
 var _acceleration = 300
 var _friction = _acceleration * 3
 var _shiftMod = 1
+var _runEnabled = false
 
 var _velocity = Vector2.ZERO
 
@@ -35,7 +36,7 @@ func _process(_delta):
 		#elif _lastDir == 2 || _lastDir == 3:
 			#_sprite.play("idle_side")
 			
-	if Input.is_action_pressed("run"):
+	if Input.is_action_pressed("run") && _runEnabled:
 		_shiftMod = 2
 		_sprite.speed_scale = 2
 	elif Input.is_action_just_released("run"):
