@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Player/Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://grave_marker.tscn" type="PackedScene" id=2]
+
+[node name="World" type="YSort"]
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+position = Vector2( 149, 95 )
+
+[node name="grave_marker2" parent="." instance=ExtResource( 2 )]
+position = Vector2( 215.833, 124.708 )
+
+[node name="grave_marker3" parent="." instance=ExtResource( 2 )]
+position = Vector2( 218.426, 70.7322 )
+
+[node name="grave_marker4" parent="." instance=ExtResource( 2 )]
+position = Vector2( 153.372, 46.2191 )
+
+[node name="grave_marker5" parent="." instance=ExtResource( 2 )]
+position = Vector2( 125.976, 124.541 )
+
+[node name="grave_marker" parent="." instance=ExtResource( 2 )]
+position = Vector2( 51.5195, 70.9756 )
