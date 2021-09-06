@@ -4,15 +4,13 @@ onready var _anim_player = $AnimationPlayer
 onready var _anim_tree = $AnimationTree
 onready var _anim_state = _anim_tree.get("parameters/playback")
 
-onready var _weapon = $Position2D/Area2D
-
 var _lastDir = 0
-var _max_speed = 150
-var _dash_speed = 250
+var _max_speed = 50
 var _acceleration = 300
 var _friction = _acceleration * 3
 var _velocity = Vector2.ZERO
 var _input_vector = Vector2.ZERO
+var _knockback = Vector2.ZERO
 
 enum{
 	MOVE,
@@ -30,34 +28,23 @@ func _physics_process(delta):
 	match _state:
 		MOVE:
 			move_state(delta)
-		DASH:
-			dash_state(delta)
-		ATTACK:
-			attack_state(delta)
 	
 func move_state(delta):
-	_input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	_input_vector.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
+	var world = get_tree().current_scene
+	var playerPath = world.find_node("Player").get_path()
+	_input_vector.x = get_node(playerPath).get_position().x - position.x
+	_input_vector.y = get_node(playerPath).get_position().y - position.y
 	_input_vector = _input_vector.normalized()
 	
 	if _input_vector != Vector2.ZERO:
-		_anim_tree.set("parameters/attack/blend_position", _input_vector)
 		_anim_tree.set("parameters/walking/blend_position", _input_vector)
-		_anim_tree.set("parameters/dash/blend_position", _input_vector)
 		_anim_state.travel("walking")
-		_weapon._knockback_vector = _input_vector
 		_velocity = _velocity.move_toward(_input_vector * _max_speed, _acceleration * delta)
 		ApplyFriction(_input_vector, delta)
 	else:
 		ApplyFriction(_input_vector, delta)
 		
 	move()
-	
-	if Input.is_action_just_pressed("run"):
-		_state = DASH
-	
-	if Input.is_action_just_pressed("ui_interact"):
-		_state = ATTACK
 
 func move():
 	_velocity = move_and_slide(_velocity)
@@ -72,17 +59,8 @@ func ApplyFriction(input_vector, delta):
 	elif _velocity.y > 0 && input_vector.y < 0 || _velocity.y < 0 && input_vector.y > 0:
 		_velocity.y = _velocity.move_toward(Vector2.ZERO, _friction * delta).y
 
-func attack_state(_delta):
-	_velocity = Vector2.ZERO
-	_anim_state.travel("attack")
 
-func attack_animation_finished():
-	_state = MOVE
-	
-func dash_state(_delta):
-	_velocity = _input_vector * _dash_speed
-	_anim_state.travel("dash")
+func _on_hurtbox_area_entered(area):
+	_knockback = area._knockback_vector * 300
+	_velocity = _knockback
 	move()
-
-func dash_animation_finished():
-	_state = MOVE
