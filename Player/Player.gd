@@ -17,7 +17,8 @@ var _input_vector = Vector2.ZERO
 enum{
 	MOVE,
 	DASH,
-	ATTACK
+	ATTACK,
+	PASS
 }
 
 var _state = MOVE
@@ -34,6 +35,8 @@ func _physics_process(delta):
 			dash_state(delta)
 		ATTACK:
 			attack_state(delta)
+		PASS:
+			pass
 	
 func move_state(delta):
 	_input_vector.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
@@ -53,11 +56,21 @@ func move_state(delta):
 		
 	move()
 	
-	if Input.is_action_just_pressed("run"):
-		_state = DASH
+	#if Input.is_action_just_pressed("run"):
+		#_state = DASH
 	
-	if Input.is_action_just_pressed("ui_interact"):
+	if Input.is_action_pressed("ui_interact"):
 		_state = ATTACK
+		
+	var world = get_tree().current_scene
+	var enemies = world.find_node("enemies")
+	if enemies.get_child_count() > 50:
+		var game_over = world.find_node("game_over")
+		game_over.visible = true
+		var credits = world.find_node("credits")
+		credits.visible = true
+		visible = false
+		_state = PASS
 
 func move():
 	_velocity = move_and_slide(_velocity)
@@ -74,7 +87,12 @@ func ApplyFriction(input_vector, delta):
 
 func attack_state(_delta):
 	_velocity = Vector2.ZERO
-	_anim_state.travel("attack")
+	var bullet = load("res://Assets/Props/bullet.tscn")
+	var iBull = bullet.instance()
+	var world = get_tree().current_scene
+	world.find_node("projectiles").add_child(iBull)
+	iBull.global_position = global_position
+	_state = MOVE
 
 func attack_animation_finished():
 	_state = MOVE

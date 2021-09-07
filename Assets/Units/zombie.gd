@@ -4,6 +4,7 @@ onready var _anim_player = $AnimationPlayer
 onready var _anim_tree = $AnimationTree
 onready var _anim_state = _anim_tree.get("parameters/playback")
 
+var _life = 2
 var _lastDir = 0
 var _max_speed = 50
 var _acceleration = 300
@@ -11,6 +12,7 @@ var _friction = _acceleration * 3
 var _velocity = Vector2.ZERO
 var _input_vector = Vector2.ZERO
 var _knockback = Vector2.ZERO
+var _growl = null
 
 enum{
 	MOVE,
@@ -23,6 +25,8 @@ var _state = MOVE
 func _ready():
 	_anim_tree.active = true
 	set_physics_process(true)
+	_growl = get_node("zombie" + String(randi() % 5 + 1))
+	_growl.play()
 
 func _physics_process(delta):
 	match _state:
@@ -31,9 +35,11 @@ func _physics_process(delta):
 	
 func move_state(delta):
 	var world = get_tree().current_scene
-	var playerPath = world.find_node("Player").get_path()
-	_input_vector.x = get_node(playerPath).get_position().x - position.x
-	_input_vector.y = get_node(playerPath).get_position().y - position.y
+	var player = world.find_node("Player")
+	if player.visible == false:
+		queue_free()
+	_input_vector.x = player.get_position().x - position.x
+	_input_vector.y = player.get_position().y - position.y
 	_input_vector = _input_vector.normalized()
 	
 	if _input_vector != Vector2.ZERO:
@@ -61,6 +67,14 @@ func ApplyFriction(input_vector, delta):
 
 
 func _on_hurtbox_area_entered(area):
-	_knockback = area._knockback_vector * 300
-	_velocity = _knockback
-	move()
+	_life = _life - 1
+	if _life == 0:
+		var world = get_tree().current_scene
+		var score = world.find_node("Label")
+		var currScore = int(score.text)
+		currScore = currScore + 2
+		score.text = String(currScore)
+		queue_free()
+	#_knockback = area._knockback_vector * 300
+	#_velocity = _knockback
+	#move()
