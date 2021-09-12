@@ -56,21 +56,11 @@ func move_state(delta):
 		
 	move()
 	
-	#if Input.is_action_just_pressed("run"):
-		#_state = DASH
+	if Input.is_action_just_pressed("run"):
+		_state = DASH
 	
 	if Input.is_action_pressed("ui_interact"):
 		_state = ATTACK
-		
-	var world = get_tree().current_scene
-	var enemies = world.find_node("enemies")
-	if enemies.get_child_count() > 50:
-		var game_over = world.find_node("game_over")
-		game_over.visible = true
-		var credits = world.find_node("credits")
-		credits.visible = true
-		visible = false
-		_state = PASS
 
 func move():
 	_velocity = move_and_slide(_velocity)
@@ -86,7 +76,7 @@ func ApplyFriction(input_vector, delta):
 		_velocity.y = _velocity.move_toward(Vector2.ZERO, _friction * delta).y
 
 func attack_state(_delta):
-	_velocity = Vector2.ZERO
+	#_velocity = Vector2.ZERO
 	var bullet = load("res://Assets/Props/bullet.tscn")
 	var iBull = bullet.instance()
 	var world = get_tree().current_scene
